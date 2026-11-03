@@ -1,0 +1,35 @@
+services:
+  web:
+    image: php:8.2-apache
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html/
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=nyte_arcade
+      - DB_USER=nyte_user
+      - DB_PASS=nyte_pass
+    depends_on:
+      - db
+    command: >
+      bash -c "docker-php-ext-install pdo pdo_mysql && apache2-foreground"
+
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: nyte_arcade
+      MYSQL_USER: nyte_user
+      MYSQL_PASSWORD: nyte_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+volumes:
+  db_data:
